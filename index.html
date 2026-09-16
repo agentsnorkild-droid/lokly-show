@@ -192,7 +192,7 @@ function renderList(){
   $('sub').textContent=up.length?`${up.length} kommende show${up.length>1?'s':''}. Check-in er tiden, vi kører efter.`:'Check-in er tiden, vi kører efter.';
   let h='';
   if(!up.length) h+='<div class="empty">Ingen kommende shows. Tryk på Nyt show for at oprette et.</div>';
-  else h+=up.map(card).join('');
+  else h+=up.map(e=>card(e,false)).join('');
   if(past.length) h+='<div class="group">Seneste</div>'+past.map(e=>card(e,true)).join('');
   $('list').innerHTML=h;
 }
