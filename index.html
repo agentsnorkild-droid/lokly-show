@@ -81,6 +81,13 @@
   .row{display:grid;grid-template-columns:1fr 1fr;gap:10px}
   .row .full{grid-column:1/-1}
   input[type=date],input[type=time]{min-width:0;-webkit-appearance:none;appearance:none}
+  .seg{display:grid;grid-template-columns:1fr 1fr 1fr;gap:6px;margin-bottom:14px}
+  .seg button{border:1px solid var(--line);background:#fafaf9;border-radius:10px;padding:11px 6px;font:inherit;font-size:14px;font-weight:500;color:var(--muted);cursor:pointer}
+  .seg button.on{background:var(--ink);color:#fff;border-color:var(--ink)}
+  input[type=date]::before,input[type=time]::before{content:attr(placeholder);color:#9a9aa3;pointer-events:none}
+  input[type=date].has::before,input[type=time].has::before,input[type=date]:focus::before,input[type=time]:focus::before{content:none}
+  input[type=date],input[type=time]{position:relative;display:flex;align-items:center}
+  .chip.kind{background:#e8ecfa;color:#2b46b8}
   .switch{display:flex;align-items:center;justify-content:space-between;border:1px solid var(--line);border-radius:10px;padding:11px 12px;margin-bottom:10px;background:#fafaf9}
   .switch span{font-size:14px;font-weight:500}
   .switch input{width:22px;height:22px;accent-color:var(--ok);margin:0}
@@ -125,15 +132,17 @@
     <input type="hidden" id="eId">
     <label>Sted</label>
     <input type="text" id="eName" placeholder="Fx Homerun, Esbjerg" required>
+    <label>Type</label>
+    <div class="seg" id="kind"><button type="button" data-k="klub" onclick="setKind('klub')">Klub</button><button type="button" data-k="skole" onclick="setKind('skole')">Skole</button><button type="button" data-k="andet" onclick="setKind('andet')">Andet</button></div>
     <label>Adresse</label>
     <input type="text" id="eAddr" placeholder="Vej og nr, postnr by">
     <div class="row">
-      <div class="full"><label>Dato</label><input type="date" id="eDate" required></div>
-      <div><label>Check-in</label><input type="time" id="eCheckin"></div>
-      <div><label>Showtid</label><input type="time" id="eTime"></div>
+      <div class="full"><label>Dato</label><input type="date" id="eDate" placeholder="Vælg dato" required onchange="this.classList.toggle('has',!!this.value)"></div>
+      <div><label>Check-in</label><input type="time" id="eCheckin" placeholder="Vælg tid" onchange="this.classList.toggle('has',!!this.value)"></div>
+      <div><label>Showtid</label><input type="time" id="eTime" placeholder="Vælg tid" onchange="this.classList.toggle('has',!!this.value)"></div>
     </div>
     <label class="switch"><span>Bil er booket</span><input type="checkbox" id="eCar"></label>
-    <input type="text" id="eCarNote" placeholder="Reservationsnr., afhentningssted og tid">
+    <input type="text" id="eCarNote" placeholder="Reservationsnr. (Avis)">
     <label>Noter</label>
     <textarea id="eDesc" placeholder="Kontaktperson, parkering, sætlængde, honorar"></textarea>
     <div class="meta" id="meta"></div>
@@ -157,7 +166,9 @@ if(API){const _f=window.fetch.bind(window);window.fetch=(u,o={})=>{if(typeof u==
 const M=['januar','februar','marts','april','maj','juni','juli','august','september','oktober','november','december'];
 const MS=['jan','feb','mar','apr','maj','jun','jul','aug','sep','okt','nov','dec'];
 const D=['man','tir','ons','tor','fre','lør','søn'], DL=['mandag','tirsdag','onsdag','torsdag','fredag','lørdag','søndag'];
-let Y,Mo,evts=[],me='';
+let Y,Mo,evts=[],me='',kind='';
+function setKind(k){kind=(kind===k)?'':k;document.querySelectorAll('#kind button').forEach(b=>b.classList.toggle('on',b.dataset.k===kind))}
+const KIND={klub:'Klub',skole:'Skole',andet:'Andet'};
 const $=id=>document.getElementById(id);
 const esc=s=>String(s||'').replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
 function fmt(d){return `${d.getFullYear()}-${p(d.getMonth()+1)}-${p(d.getDate())}`}
@@ -190,9 +201,10 @@ function card(e,isPast){
       <div class="t">${esc(e.title)}</div>
       ${e.address?`<div class="a">${esc(e.address)}</div>`:'<div class="a">Adresse mangler</div>'}
       <div class="chips">
+        ${e.kind?`<span class="chip kind">${KIND[e.kind]||esc(e.kind)}</span>`:''}
         ${e.checkin?`<span class="chip main">Check-in ${e.checkin}</span>`:(isPast?'':'<span class="chip warn">Check-in mangler</span>')}
         ${e.time?`<span class="chip">Show ${e.time}</span>`:''}
-        ${e.car?`<span class="chip ok">Bil booket${e.car_note?' · '+esc(e.car_note):''}</span>`:(isPast?'':'<span class="chip warn">Bil ikke booket</span>')}
+        ${e.car?`<span class="chip ok">Bil ${e.car_note?esc(e.car_note):'booket'}</span>`:(isPast?'':'<span class="chip warn">Bil ikke booket</span>')}
       </div>
     </div></div>`;
 }
@@ -216,6 +228,7 @@ function go(dir){Mo+=dir;if(Mo<0){Mo=11;Y--}if(Mo>11){Mo=0;Y++}renderGrid();$('m
 function fill(e){
   $('eId').value=e.id||'';$('eName').value=e.title||'';$('eAddr').value=e.address||'';$('eDate').value=e.date||'';
   $('eCheckin').value=e.checkin||'';$('eTime').value=e.time||'';$('eCar').checked=!!e.car;$('eCarNote').value=e.car_note||'';$('eDesc').value=e.description||'';
+  setKind('');if(e.kind)setKind(e.kind);['eDate','eCheckin','eTime'].forEach(i=>$(i).classList.toggle('has',!!$(i).value));
 }
 function open_(ds){
   fill({date:ds||''});$('mTitle').textContent='Nyt show';$('bDel').style.display='none';$('cmts').style.display='none';$('meta').textContent='';
@@ -237,7 +250,7 @@ async function addComment(){
 async function save_(ev){
   ev.preventDefault();
   const id=$('eId').value;
-  const d={title:$('eName').value.trim(),address:$('eAddr').value.trim(),date:$('eDate').value,checkin:$('eCheckin').value,time:$('eTime').value,car:$('eCar').checked,car_note:$('eCarNote').value.trim(),description:$('eDesc').value.trim(),color:'#14141a'};
+  const d={title:$('eName').value.trim(),kind:kind,address:$('eAddr').value.trim(),date:$('eDate').value,checkin:$('eCheckin').value,time:$('eTime').value,car:$('eCar').checked,car_note:$('eCarNote').value.trim(),description:$('eDesc').value.trim(),color:'#14141a'};
   if(!d.title||!d.date)return;
   if(!d.address&&!confirm('Der er ingen adresse. Gem alligevel?'))return;
   const url=id?`/api/calendar/${id}`:'/api/calendar';
