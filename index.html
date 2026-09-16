@@ -256,9 +256,22 @@ async function save_(ev){
   const d={title:$('eName').value.trim(),kind:kind,address:$('eAddr').value.trim(),date:$('eDate').value,checkin:$('eCheckin').value,time:$('eTime').value,car:$('eCar').checked,car_note:$('eCarNote').value.trim(),description:$('eDesc').value.trim(),color:'#14141a'};
   if(!d.title||!d.date)return;
   if(!d.address&&!confirm('Der er ingen adresse. Gem alligevel?'))return;
+  if(!id){
+    const same=evts.filter(e=>e.date===d.date);
+    if(same.length){
+      const t=d.title.toLowerCase(), a=d.address.toLowerCase();
+      const strong=same.filter(e=>(e.title||'').toLowerCase()===t||(a&&(e.address||'').toLowerCase()===a)||(d.checkin&&e.checkin===d.checkin));
+      const liste=same.map(e=>`${e.title}${e.checkin?' (check-in '+e.checkin+')':e.time?' (show '+e.time+')':''}`).join(', ');
+      const msg=strong.length?`Det show findes allerede den ${d.date.split('-').reverse().join('/')}: ${liste}. Opret det alligevel?`:`Der er allerede et show den ${d.date.split('-').reverse().join('/')}: ${liste}. Opret et til?`;
+      if(!confirm(msg)) return;
+      d.force=true;
+    }
+  }
   const url=id?`/api/calendar/${id}`:'/api/calendar';
   const hd={'Content-Type':'application/json'};if(id)hd['X-Method']='PUT';
-  await fetch(url,{method:'POST',headers:hd,body:JSON.stringify(d)});
+  const r=await fetch(url,{method:'POST',headers:hd,body:JSON.stringify(d)});
+  const j=await r.json().catch(()=>({}));
+  if(j&&j.duplicate){ if(!confirm(`Det show findes allerede: ${j.duplicate.map(x=>x.title).join(', ')}. Opret det alligevel?`)) return; d.force=true; await fetch(url,{method:'POST',headers:hd,body:JSON.stringify(d)}); }
   close_();await load();
 }
 async function del_(){
