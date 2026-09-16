@@ -46,7 +46,7 @@ if(API){const _f=window.fetch.bind(window);window.fetch=(u,o={})=>{if(typeof u==
 document.getElementById('f').addEventListener('submit',async e=>{
   e.preventDefault();
   const b=new URLSearchParams({username:document.getElementById('u').value.trim(),password:document.getElementById('p').value});
-  const r=await fetch('/api/login',{method:'POST',headers:{'Content-Type':'application/x-www-form-urlencoded'},body:b});
+  let r; try{ r=await fetch('/api/login',{method:'POST',headers:{'Content-Type':'application/x-www-form-urlencoded'},body:b}); }catch(err){ const e=document.getElementById('err'); e.textContent='Kunne ikke nå serveren. Prøv igen om lidt.'; e.classList.add('on'); return; }
   if(r.ok){ try{const j=await r.json();if(j.token)localStorage.setItem('show_token',j.token);}catch(e){} location.href=HOME; } else { document.getElementById('err').classList.add('on'); }
 });
 </script>
