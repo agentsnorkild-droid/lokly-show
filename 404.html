@@ -1,0 +1,264 @@
+<!DOCTYPE html>
+<html lang="da">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Niklas Shows</title>
+<link rel="manifest" href="show-manifest.json">
+<link rel="apple-touch-icon" href="show-icon.png">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="default">
+<meta name="apple-mobile-web-app-title" content="Shows">
+<meta name="theme-color" content="#f4f4f2">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+  :root{--bg:#f4f4f2;--card:#fff;--ink:#14141a;--muted:#6b6b76;--line:#e4e4e0;--soft:#f0f0ee;--accent:#1f4fd8;--ok:#1b7f4b;--ok-bg:#e6f4ec;--warn:#b42318;--warn-bg:#fbeae9;--today:#1f4fd8}
+  *{box-sizing:border-box;margin:0;padding:0}
+  html{-webkit-text-size-adjust:100%}
+  body{background:var(--bg);color:var(--ink);font-family:Inter,-apple-system,system-ui,sans-serif;min-height:100vh;padding-bottom:env(safe-area-inset-bottom)}
+  header{position:sticky;top:0;z-index:5;background:rgba(244,244,242,.92);backdrop-filter:blur(10px);border-bottom:1px solid var(--line)}
+  .bar{max-width:960px;margin:0 auto;padding:14px 20px;display:flex;align-items:center;justify-content:space-between;gap:12px}
+  .mark{display:flex;align-items:center;gap:10px}
+  .mark .sq{width:32px;height:32px;border-radius:8px;background:var(--ink);color:#fff;display:grid;place-items:center;font-weight:700;font-size:15px}
+  .mark b{font-size:15px;font-weight:600}
+  .who{font-size:13px;color:var(--muted);display:flex;gap:12px;align-items:center}
+  .who a{color:var(--muted);text-decoration:none}
+  .who a:hover{color:var(--ink)}
+  main{max-width:960px;margin:0 auto;padding:20px}
+  .top{display:flex;align-items:center;justify-content:space-between;gap:12px;margin-bottom:16px}
+  h2{font-size:20px;font-weight:600;letter-spacing:-.2px}
+  .sub{font-size:13px;color:var(--muted);margin-top:2px}
+  .btn{border:0;border-radius:10px;padding:11px 16px;font:inherit;font-size:14px;font-weight:600;cursor:pointer;background:var(--ink);color:#fff;white-space:nowrap}
+  .btn:hover{background:#000}
+  .btn.ghost{background:var(--card);color:var(--ink);border:1px solid var(--line)}
+  .btn.ghost:hover{background:var(--soft)}
+  .btn.danger{background:var(--warn-bg);color:var(--warn)}
+  .tabs{display:flex;gap:6px;background:var(--soft);padding:4px;border-radius:10px;margin-bottom:18px;width:max-content}
+  .tab{border:0;background:transparent;padding:8px 14px;border-radius:8px;font:inherit;font-size:13px;font-weight:600;color:var(--muted);cursor:pointer}
+  .tab.on{background:var(--card);color:var(--ink);box-shadow:0 1px 2px rgba(0,0,0,.06)}
+  /* liste */
+  .list{display:flex;flex-direction:column;gap:10px}
+  .group{font-size:12px;font-weight:600;color:var(--muted);text-transform:uppercase;letter-spacing:.6px;margin:14px 0 4px}
+  .show{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:14px 16px;display:grid;grid-template-columns:64px 1fr;gap:14px;cursor:pointer;transition:border-color .15s,box-shadow .15s}
+  .show:hover{border-color:#cfcfca;box-shadow:0 6px 20px -14px rgba(20,20,26,.3)}
+  .show.past{opacity:.55}
+  .d{display:flex;flex-direction:column;align-items:center;justify-content:center;background:var(--soft);border-radius:10px;padding:8px 4px;line-height:1.1}
+  .d .dd{font-size:22px;font-weight:700}
+  .d .mm{font-size:11px;font-weight:600;color:var(--muted);text-transform:uppercase}
+  .d .wd{font-size:11px;color:var(--muted);margin-top:3px}
+  .t{font-size:16px;font-weight:600;letter-spacing:-.1px}
+  .a{font-size:13px;color:var(--muted);margin-top:2px}
+  .chips{display:flex;flex-wrap:wrap;gap:6px;margin-top:8px}
+  .chip{font-size:12px;font-weight:600;padding:4px 9px;border-radius:999px;background:var(--soft);color:var(--ink)}
+  .chip.main{background:var(--ink);color:#fff}
+  .chip.ok{background:var(--ok-bg);color:var(--ok)}
+  .chip.warn{background:var(--warn-bg);color:var(--warn)}
+  .empty{background:var(--card);border:1px dashed var(--line);border-radius:14px;padding:32px;text-align:center;color:var(--muted);font-size:14px}
+  /* kalender */
+  .cal{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:16px}
+  .nav{display:flex;align-items:center;justify-content:space-between;margin-bottom:12px}
+  .nav b{font-size:15px;font-weight:600}
+  .nav .btn{padding:7px 12px}
+  .grid{display:grid;grid-template-columns:repeat(7,1fr);gap:4px}
+  .hd{text-align:center;font-size:11px;font-weight:600;color:var(--muted);padding:6px 0;text-transform:uppercase}
+  .day{min-height:78px;border:1px solid var(--line);border-radius:8px;padding:6px;font-size:12px;cursor:pointer;background:#fafaf9}
+  .day:hover{border-color:#cfcfca;background:#fff}
+  .day.other{opacity:.3;pointer-events:none}
+  .day.today .n{color:#fff;background:var(--today)}
+  .day .n{display:inline-grid;place-items:center;width:22px;height:22px;border-radius:6px;font-weight:600;margin-bottom:4px}
+  .day .ev{display:block;font-size:11px;font-weight:600;background:var(--ink);color:#fff;border-radius:5px;padding:2px 5px;margin-top:2px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+  /* modal */
+  .ov{display:none;position:fixed;inset:0;background:rgba(20,20,26,.45);z-index:20;align-items:flex-end;justify-content:center}
+  .ov.on{display:flex}
+  .sheet{background:var(--card);width:100%;max-width:520px;border-radius:18px 18px 0 0;padding:20px 20px calc(20px + env(safe-area-inset-bottom));max-height:92vh;overflow:auto}
+  @media(min-width:640px){.ov{align-items:center}.sheet{border-radius:18px}}
+  .sheet h3{font-size:18px;font-weight:600;margin-bottom:16px}
+  label{display:block;font-size:12px;font-weight:600;color:var(--muted);margin:0 0 6px}
+  input[type=text],input[type=date],input[type=time],textarea{width:100%;border:1px solid var(--line);border-radius:10px;padding:11px 12px;font:inherit;font-size:16px;color:var(--ink);background:#fafaf9;margin-bottom:14px;outline:none}
+  input:focus,textarea:focus{border-color:var(--accent);background:#fff}
+  textarea{min-height:70px;resize:vertical}
+  .row{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+  .row .full{grid-column:1/-1}
+  input[type=date],input[type=time]{min-width:0;-webkit-appearance:none;appearance:none}
+  .switch{display:flex;align-items:center;justify-content:space-between;border:1px solid var(--line);border-radius:10px;padding:11px 12px;margin-bottom:10px;background:#fafaf9}
+  .switch span{font-size:14px;font-weight:500}
+  .switch input{width:22px;height:22px;accent-color:var(--ok);margin:0}
+  .actions{display:flex;gap:10px;margin-top:6px}
+  .actions .btn{flex:1}
+  .meta{font-size:12px;color:var(--muted);margin:6px 0 14px}
+  .cmts{border-top:1px solid var(--line);margin-top:16px;padding-top:14px}
+  .cmt{background:var(--soft);border-radius:10px;padding:9px 11px;margin-bottom:6px;font-size:13px}
+  .cmt b{font-weight:600;font-size:12px;color:var(--muted);display:block;margin-bottom:2px}
+  .cmtrow{display:flex;gap:8px;margin-top:8px}
+  .cmtrow input{margin:0}
+  .cmtrow .btn{padding:10px 14px}
+</style>
+</head>
+<body>
+<header><div class="bar">
+  <div class="mark"><div class="sq">N</div><b>Niklas Shows</b></div>
+  <div class="who" id="who"></div>
+</div></header>
+
+<main>
+  <div class="top">
+    <div><h2>Shows</h2><div class="sub" id="sub">Check-in er tiden, vi kører efter.</div></div>
+    <button class="btn" onclick="open_()">Nyt show</button>
+  </div>
+  <div class="tabs">
+    <button class="tab on" id="tabL" onclick="tab('L')">Liste</button>
+    <button class="tab" id="tabC" onclick="tab('C')">Kalender</button>
+  </div>
+  <section id="viewL"><div class="list" id="list"></div></section>
+  <section id="viewC" style="display:none">
+    <div class="cal">
+      <div class="nav"><button class="btn ghost" onclick="go(-1)">‹</button><b id="mLabel"></b><button class="btn ghost" onclick="go(1)">›</button></div>
+      <div class="grid" id="grid"></div>
+    </div>
+  </section>
+</main>
+
+<div class="ov" id="ov">
+  <form class="sheet" id="form" onsubmit="save_(event)">
+    <h3 id="mTitle">Nyt show</h3>
+    <input type="hidden" id="eId">
+    <label>Sted</label>
+    <input type="text" id="eName" placeholder="Fx Homerun, Esbjerg" required>
+    <label>Adresse</label>
+    <input type="text" id="eAddr" placeholder="Vej og nr, postnr by">
+    <div class="row">
+      <div class="full"><label>Dato</label><input type="date" id="eDate" required></div>
+      <div><label>Check-in</label><input type="time" id="eCheckin"></div>
+      <div><label>Showtid</label><input type="time" id="eTime"></div>
+    </div>
+    <label class="switch"><span>Bil er booket</span><input type="checkbox" id="eCar"></label>
+    <input type="text" id="eCarNote" placeholder="Reservationsnr., afhentningssted og tid">
+    <label>Noter</label>
+    <textarea id="eDesc" placeholder="Kontaktperson, parkering, sætlængde, honorar"></textarea>
+    <div class="meta" id="meta"></div>
+    <div class="actions">
+      <button type="button" class="btn ghost" onclick="close_()">Luk</button>
+      <button type="button" class="btn danger" id="bDel" style="display:none" onclick="del_()">Slet</button>
+      <button type="submit" class="btn">Gem</button>
+    </div>
+    <div class="cmts" id="cmts" style="display:none">
+      <label>Kommentarer</label>
+      <div id="cmtList"></div>
+      <div class="cmtrow"><input type="text" id="cmtIn" placeholder="Skriv en kommentar"><button type="button" class="btn" onclick="addComment()">Send</button></div>
+    </div>
+  </form>
+</div>
+
+<script>
+const API=location.hostname.endsWith('lokly.dk')?'https://show.snorkild.cc':'';
+const LOGIN=API?'/login.html':'/show', HOME=API?'/':'/show';
+if(API){const _f=window.fetch.bind(window);window.fetch=(u,o={})=>{if(typeof u==='string'&&u.startsWith('/api/')){u=API+u;o=Object.assign({credentials:'include'},o);let t='';try{t=localStorage.getItem('show_token')||''}catch(e){}if(t){o.headers=Object.assign({},o.headers||{},{'X-Session':t});}}return _f(u,o);};}
+const M=['januar','februar','marts','april','maj','juni','juli','august','september','oktober','november','december'];
+const MS=['jan','feb','mar','apr','maj','jun','jul','aug','sep','okt','nov','dec'];
+const D=['man','tir','ons','tor','fre','lør','søn'], DL=['mandag','tirsdag','onsdag','torsdag','fredag','lørdag','søndag'];
+let Y,Mo,evts=[],me='';
+const $=id=>document.getElementById(id);
+const esc=s=>String(s||'').replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
+function fmt(d){return `${d.getFullYear()}-${p(d.getMonth()+1)}-${p(d.getDate())}`}
+function p(n){return String(n).padStart(2,'0')}
+function wd(ds){const d=new Date(ds+'T12:00:00');return DL[(d.getDay()+6)%7]}
+
+async function load(){
+  const r=await fetch('/api/calendar');
+  if(r.status===401){location.href=LOGIN;return}
+  evts=await r.json(); render();
+}
+function render(){renderList();renderGrid();$('mLabel').textContent=`${M[Mo]} ${Y}`}
+
+function renderList(){
+  const td=fmt(new Date());
+  const up=evts.filter(e=>e.date>=td).sort((a,b)=>(a.date+(a.checkin||a.time||'')).localeCompare(b.date+(b.checkin||b.time||'')));
+  const past=evts.filter(e=>e.date<td).sort((a,b)=>b.date.localeCompare(a.date)).slice(0,5);
+  $('sub').textContent=up.length?`${up.length} kommende show${up.length>1?'s':''}. Check-in er tiden, vi kører efter.`:'Check-in er tiden, vi kører efter.';
+  let h='';
+  if(!up.length) h+='<div class="empty">Ingen kommende shows. Tryk på Nyt show for at oprette et.</div>';
+  else h+=up.map(card).join('');
+  if(past.length) h+='<div class="group">Seneste</div>'+past.map(e=>card(e,true)).join('');
+  $('list').innerHTML=h;
+}
+function card(e,isPast){
+  const d=new Date(e.date+'T12:00:00');
+  return `<div class="show ${isPast?'past':''}" onclick="edit_('${e.id}')">
+    <div class="d"><span class="dd">${d.getDate()}</span><span class="mm">${MS[d.getMonth()]}</span><span class="wd">${D[(d.getDay()+6)%7]}</span></div>
+    <div>
+      <div class="t">${esc(e.title)}</div>
+      ${e.address?`<div class="a">${esc(e.address)}</div>`:'<div class="a">Adresse mangler</div>'}
+      <div class="chips">
+        ${e.checkin?`<span class="chip main">Check-in ${e.checkin}</span>`:(isPast?'':'<span class="chip warn">Check-in mangler</span>')}
+        ${e.time?`<span class="chip">Show ${e.time}</span>`:''}
+        ${e.car?`<span class="chip ok">Bil booket${e.car_note?' · '+esc(e.car_note):''}</span>`:(isPast?'':'<span class="chip warn">Bil ikke booket</span>')}
+      </div>
+    </div></div>`;
+}
+function renderGrid(){
+  const g=$('grid');
+  let h=D.map(d=>`<div class="hd">${d}</div>`).join('');
+  const f=new Date(Y,Mo,1), l=new Date(Y,Mo+1,0), s=(f.getDay()+6)%7, ts=fmt(new Date()), pl=new Date(Y,Mo,0);
+  for(let i=s-1;i>=0;i--) h+=`<div class="day other"><span class="n">${pl.getDate()-i}</span></div>`;
+  for(let d=1;d<=l.getDate();d++){
+    const ds=`${Y}-${p(Mo+1)}-${p(d)}`;
+    const de=evts.filter(e=>e.date===ds).map(e=>`<span class="ev" onclick="event.stopPropagation();edit_('${e.id}')">${e.checkin||e.time||''} ${esc(e.title)}</span>`).join('');
+    h+=`<div class="day ${ds===ts?'today':''}" onclick="open_('${ds}')"><span class="n">${d}</span>${de}</div>`;
+  }
+  const tot=s+l.getDate(), rem=(7-tot%7)%7;
+  for(let i=1;i<=rem;i++) h+=`<div class="day other"><span class="n">${i}</span></div>`;
+  g.innerHTML=h;
+}
+function tab(t){$('tabL').classList.toggle('on',t==='L');$('tabC').classList.toggle('on',t==='C');$('viewL').style.display=t==='L'?'':'none';$('viewC').style.display=t==='C'?'':'none';try{localStorage.setItem('showtab',t)}catch(e){}}
+function go(dir){Mo+=dir;if(Mo<0){Mo=11;Y--}if(Mo>11){Mo=0;Y++}renderGrid();$('mLabel').textContent=`${M[Mo]} ${Y}`}
+
+function fill(e){
+  $('eId').value=e.id||'';$('eName').value=e.title||'';$('eAddr').value=e.address||'';$('eDate').value=e.date||'';
+  $('eCheckin').value=e.checkin||'';$('eTime').value=e.time||'';$('eCar').checked=!!e.car;$('eCarNote').value=e.car_note||'';$('eDesc').value=e.description||'';
+}
+function open_(ds){
+  fill({date:ds||''});$('mTitle').textContent='Nyt show';$('bDel').style.display='none';$('cmts').style.display='none';$('meta').textContent='';
+  $('ov').classList.add('on');setTimeout(()=>$('eName').focus(),50);
+}
+function edit_(id){
+  const e=evts.find(x=>x.id===id);if(!e)return;
+  fill(e);$('mTitle').textContent=e.title||'Show';$('bDel').style.display='';$('cmts').style.display='';
+  $('meta').textContent=(e.created_by?`Oprettet af ${e.created_by}${e.created?' '+e.created.slice(0,10):''}`:'')+(e.updated_by?` · ændret af ${e.updated_by} ${(e.updated||'').slice(0,10)}`:'');
+  renderComments(e.comments);$('cmtIn').value='';$('ov').classList.add('on');
+}
+function close_(){$('ov').classList.remove('on')}
+function renderComments(c){$('cmtList').innerHTML=(c&&c.length)?c.map(x=>`<div class="cmt"><b>${esc(x.user)} · ${esc((x.time||'').replace('T',' ').slice(0,16))}</b>${esc(x.text)}</div>`).join(''):'<div class="meta">Ingen kommentarer.</div>'}
+async function addComment(){
+  const id=$('eId').value,text=$('cmtIn').value.trim();if(!id||!text)return;
+  await fetch(`/api/calendar/${id}/comments`,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({text})});
+  await load();const e=evts.find(x=>x.id===id);if(e)renderComments(e.comments);$('cmtIn').value='';
+}
+async function save_(ev){
+  ev.preventDefault();
+  const id=$('eId').value;
+  const d={title:$('eName').value.trim(),address:$('eAddr').value.trim(),date:$('eDate').value,checkin:$('eCheckin').value,time:$('eTime').value,car:$('eCar').checked,car_note:$('eCarNote').value.trim(),description:$('eDesc').value.trim(),color:'#14141a'};
+  if(!d.title||!d.date)return;
+  if(!d.address&&!confirm('Der er ingen adresse. Gem alligevel?'))return;
+  const url=id?`/api/calendar/${id}`:'/api/calendar';
+  const hd={'Content-Type':'application/json'};if(id)hd['X-Method']='PUT';
+  await fetch(url,{method:'POST',headers:hd,body:JSON.stringify(d)});
+  close_();await load();
+}
+async function del_(){
+  const id=$('eId').value;if(!id||!confirm('Slet dette show?'))return;
+  await fetch(`/api/calendar/${id}`,{method:'POST',headers:{'Content-Type':'application/json','X-Method':'DELETE'},body:'{}'});
+  close_();await load();
+}
+async function logout_(){await fetch('/api/logout',{method:'POST'});try{localStorage.removeItem('show_token')}catch(e){}location.href=LOGIN}
+$('ov').addEventListener('click',e=>{if(e.target.id==='ov')close_()});
+document.addEventListener('keydown',e=>{if(e.key==='Escape')close_()});
+(function init(){
+  const n=new Date();Y=n.getFullYear();Mo=n.getMonth();
+  try{if(localStorage.getItem('showtab')==='C')tab('C')}catch(e){}
+  fetch('/api/me').then(r=>r.json()).then(d=>{me=d.user||'';if(d.user)$('who').innerHTML=`<span>${esc(d.name||d.user)}</span><a href="#" onclick="logout_();return false">Log ud</a>`;else location.href=LOGIN});
+  load();
+})();
+</script>
+</body>
+</html>
