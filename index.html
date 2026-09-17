@@ -205,8 +205,8 @@ function card(e,isPast){
       ${e.address?`<div class="a">${esc(e.address)}</div>`:'<div class="a">Adresse mangler</div>'}
       <div class="chips">
         ${e.kind?`<span class="chip kind">${KIND[e.kind]||esc(e.kind)}</span>`:''}
-        ${e.checkin?`<span class="chip main">Check-in ${e.checkin}</span>`:(isPast?'':'<span class="chip warn">Check-in mangler</span>')}
-        ${e.time?`<span class="chip">Show ${e.time}</span>`:''}
+        ${e.checkin?`<span class="chip main">Check-in ${esc(e.checkin)}</span>`:(isPast?'':'<span class="chip warn">Check-in mangler</span>')}
+        ${e.time?`<span class="chip">Show ${esc(e.time)}</span>`:''}
         ${e.car?`<span class="chip ok">Bil ${e.car_note?esc(e.car_note):'booket'}</span>`:(isPast?'':'<span class="chip warn">Bil ikke booket</span>')}
       </div>
     </div></div>`;
@@ -218,7 +218,7 @@ function renderGrid(){
   for(let i=s-1;i>=0;i--) h+=`<div class="day other"><span class="n">${pl.getDate()-i}</span></div>`;
   for(let d=1;d<=l.getDate();d++){
     const ds=`${Y}-${p(Mo+1)}-${p(d)}`;
-    const de=evts.filter(e=>e.date===ds).map(e=>`<span class="ev" onclick="event.stopPropagation();edit_('${e.id}')">${e.checkin||e.time||''} ${esc(e.title)}</span>`).join('');
+    const de=evts.filter(e=>e.date===ds).map(e=>`<span class="ev" onclick="event.stopPropagation();edit_('${e.id}')">${esc(e.checkin||e.time||'')} ${esc(e.title)}</span>`).join('');
     h+=`<div class="day ${ds===ts?'today':''}" onclick="open_('${ds}')"><span class="n">${d}</span>${de}</div>`;
   }
   const tot=s+l.getDate(), rem=(7-tot%7)%7;
